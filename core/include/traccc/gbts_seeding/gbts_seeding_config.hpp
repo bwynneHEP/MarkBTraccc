@@ -41,30 +41,20 @@ struct gbts_layerInfo {
 	}
 };
 
-enum gbts_consts : unsigned short {
+struct gbts_consts {
 	
 	//CCA max iterations -> maxium seed length
-	max_cca_iter = 20,
+	static constexpr short max_cca_iter = 20;
 	//shared memory allocation sizes
-	node_buffer_length = 250,
-	shared_state_buffer_size = 578,
-	//matrix access for kalman filter state
-	M3_0_0 = 0, 
-	M3_0_1 = 1, 
-	M3_0_2 = 2,
-	M3_1_1 = 3,
-	M3_1_2 = 4,
-	M3_2_2 = 5,
-
-	M2_0_0 = 0,
-	M2_0_1 = 1,
-	M2_1_1 = 1,
+	static constexpr short node_buffer_length = 250;
+	static constexpr short shared_state_buffer_size = 608;
+	
 	// access into output graph
-	node1 = 0,
-	node2 = 1,
-	nNei = 2,
-	nei_start = 3
-}; 
+	static constexpr short node1 = 0;
+	static constexpr short node2 = 1;
+	static constexpr short nNei = 2;
+	static constexpr short nei_start = 3;
+};
 
 }
 
@@ -79,15 +69,15 @@ struct gbts_algo_params {
 	
 	float minDeltaRadius = 2.0f;
 	
-	float min_z0 = -160.0f;
-	float max_z0 = 160.0f;
+	float min_z0 = -150.0f;
+	float max_z0 = 150.0f;
 	float maxOuterRadius = 550.0f;
-	float cut_zMinU = min_z0 - maxOuterRadius*36;
-	float cut_zMaxU = max_z0 + maxOuterRadius*36; //how to get ROI dzdr
+	float cut_zMinU = min_z0 - maxOuterRadius*45;
+	float cut_zMaxU = max_z0 + maxOuterRadius*45; //how to get ROI dzdr
 	
-	float max_Kappa = 0.337f;
-	float low_Kappa_d0 = 0.02f;
-	float high_Kappa_d0 = 0.1f;
+	float max_Kappa = 3.75e-4f;
+	float low_Kappa_d0 = 0.0f; //used to be 0.2f
+	float high_Kappa_d0 = 0.0f; //used to be 1.0f
 
 	//edge matching cuts
 	float cut_dphi_max = 0.012f;
@@ -96,18 +86,16 @@ struct gbts_algo_params {
 };
 
 struct gbts_seedfinder_config {
-	bool setLinkingScheme(const std::vector<std::pair<int, std::vector<int>>>& binTables, const device::gbts_layerInfo layerInfo,
+    bool setLinkingScheme(const std::vector<std::pair<int, std::vector<int>>>& binTables, const device::gbts_layerInfo layerInfo,
     std::vector<std::pair<uint64_t, short>>& detrayBarcodeBinning, float minPt, std::unique_ptr<const ::Acts::Logger> logger);
 	
 	//layer linking and geometry	
 	std::vector<std::pair<int, int>> binTables{};
 	traccc::device::gbts_layerInfo layerInfo{};
 	unsigned int nLayers  = 0;	
-	std::shared_ptr<short[]> volumeToLayerMap{};
-	unsigned int volumeMapSize = 0;	
 
+	std::vector<short> volumeToLayerMap{};
 	std::vector<std::array<unsigned int, 2>> surfaceToLayerMap{};
-	unsigned int surfaceMapSize = 0;	
 
 	//tuned for 900 MeV pT cut and scaled by input minPt	
 	gbts_algo_params algo_params{};	
